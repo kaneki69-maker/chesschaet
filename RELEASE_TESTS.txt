@@ -1,0 +1,10 @@
+ChessCheat Pro Android 2.5.0 release verification
+
+PASS: core Kotlin/JVM smoke (FEN, occupancy, geometry, move inference, tensor preprocessing, 13-class output decoder)
+PASS: ELF smoke (magic, bitness, endianness, ABI validation)
+PASS: model runtime Kotlin compilation against a minimal TensorFlow Lite API stub (syntax/type-shape integration check only)
+PASS: source archive ZIP CRC
+PASS: SHA-256 generated for release archive
+
+NOT RUN: full Android Gradle build, Android unit-test task, APK packaging, emulator/device tests. No Gradle executable/wrapper or Android SDK is installed in this environment.
+NOT AVAILABLE: trained TFLite weights. The 2.5.0 app has a real TFLite inference path but piece recognition requires a compatible trained model to be imported.

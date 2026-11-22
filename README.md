@@ -1,51 +1,110 @@
-# ChessCheat Pro Android 3.0.0
+# ChessCheat Pro
 
-Android-приложение для **разбора и тренировки**: импорт PGN/FEN, пошаговый просмотр партии, распознавание шахматной позиции по снимку экрана (ML на устройстве), автоматическое отслеживание ходов между снимками, анализ Stockfish (до 3 линий), редактор позиции и плавающее окно с последним результатом.
+ChessCheat Pro is a small browser extension for experimenting with live chess-board reading, Stockfish analysis, and a floating in-page analysis panel on Chess.com.
 
-> Приложение не предназначено для подсказок в партиях против людей — это нарушает правила платформ. Захват экрана — по одному снимку и только после системного разрешения Android; непрерывного наблюдения за экраном нет (так было и в 2.5.0).
+I built this as a learning project. It is not made to support cheating, fair-play abuse, or use in rated/competitive games.
 
-## Что нового в 3.0.0 (кратко)
-| Область | Состояние |
-|---|---|
-| Распознавание 12 фигур + пустая клетка | Своя CNN (4×32×32 → 13 классов), веса обучены в `ml/`, лежат в `app/src/main/assets/piece_cnn.bin` (175 КБ), инференс на чистом Kotlin |
-| Поиск доски на скриншоте | Грубый поиск + привязка к линиям сетки, точность ~1 px; доска на всю ширину; ручная область как запасной вариант |
-| Восстановление позиции | Ориентация (белые/чёрные снизу) и расстановка из одного снимка; неуверенные клетки помечаются, а не угадываются |
-| Отслеживание партии | `GameTracker`: ходы, взятия (в т.ч. на проходе), рокировки, превращения; пропущенные полуходы; неоднозначность → отказ, а не догадка |
-| Правила | Собственный полный генератор легальных ходов `ChessRules.kt` (проверен perft, см. AUDIT_REPORT) |
-| Stockfish | UCI-клиент `UciEngine.kt` (MultiPV, отмена, оценка с точки зрения белых), встроенный `libstockfish.so` или импорт ELF |
-| UI | Автооткрытие экрана сканирования после снимка, правка клеток/хода/рокировки/en-passant, ход «Сканировать следующий ход», отмена хода, копирование PGN, стрелка лучшего хода, линии анализа в SAN |
+## Showcase
 
-Подробности — `CHANGELOG.md`, проверки и **ограничения** — `AUDIT_REPORT.md`.
+https://github.com/user-attachments/assets/3314dd94-f6a8-4a76-9579-f1b8bb2d2845
 
-## Важно: что не проверено
-* **APK в этой среде не собирался** (нет Android SDK и доступа к Maven). Gradle-сборка, Compose-экраны, MediaProjection, оверлей и запуск Stockfish на устройстве **не проверялись**. Первая же сборка на вашей машине/в CI (`.github/workflows/android.yml`) может выявить ошибки компиляции Compose-кода.
-* ML-модель обучена на **синтетических** скриншотах (шрифтовые наборы фигур). Точность на реальных клиентах (chess.com, lichess и т. д.) **не измерена** и может быть заметно ниже. См. `ML_MODEL_SPEC.md`.
+If the preview does not load, the local MP4 is here: [assets/showcase-video.mp4](assets/showcase-video.mp4)
 
-## Сборка
-Требования: Android Studio / AGP 8.10.1, JDK 17, Android SDK 35.
+## Features
 
-1. Положите Stockfish (arm64) в проект: скачайте `stockfish-android-armv8` из официальных релизов Stockfish и выполните  
-   `tools/bundle_stockfish.sh /путь/к/stockfish-android-armv8`  
-   (файл ~80 МБ, поэтому в архив исходников он не входит; лицензия GPL-3.0 — см. `THIRD_PARTY.md`). Без него приложение собирается, а движок можно импортировать из интерфейса или будет доступен лишь облачный анализ.
-2. `gradle :app:testDebugUnitTest :app:assembleDebug` (или CI-workflow).
+- Floating analysis panel on Chess.com
+- Stockfish-powered best-move suggestions
+- Adjustable analysis depth, defaulting to depth 11
+- Automatic board orientation detection for white or black
+- Move display in a simple `from -> to` format
+- Board highlights for the suggested move
+- Evaluation bar shown from White's point of view
+- Draggable overlay panel, so you can move it out of the way
+- Start/stop button for quickly restarting analysis
+- Clean dark UI with a compact layout
 
-## Тесты без Android SDK
-`bash tools/run_jvm_tests.sh [фильтр]` — компилирует чистые Kotlin-модули и модульные тесты (`app/src/test`) через kotlinc из дистрибутива Gradle и запускает 105 проверок (правила/perft, трекер, детектор, паритет CNN с NumPy, сквозной тест на скриншотах, правки движка и т. д.).  
-Живая проверка UCI-клиента на настоящем движке: `verification/v3/live/UciEngineLive.kt` (запускалась на Stockfish 11, собранном под x86; ARM-сборка 17.1 здесь запуститься не могла).
+## Installation
 
-## Переобучение модели
-```
-python3 ml/gen_dataset.py ...        # синтетический датасет (воспроизводим, seed)
-python3 ml/train.py --train data/train.npz --val data/val.npz --out models/full.npz --epochs 6
-python3 ml/eval_model.py models/full.npz
-python3 ml/export_weights.py models/full.npz app/src/main/assets   # + parity.bin для теста
-```
-Нужны только `numpy`, `Pillow`, `opencv` (cv2); для шрифтов используются системные шрифты со шахматными глифами. Результаты оценки: `ml/results/`.
+### Chrome or Edge
 
-## Структура
-- `ChessRules.kt` — позиция, легальные ходы, SAN, FEN; `ChessSession.kt`, `ChessImport.kt` — PGN/FEN
-- `BoardGeometryDetector.kt` → `PieceFeatureExtractor.kt` → `NativePieceNet.kt` → `BoardRecognizer.kt` → `BoardScanPipeline.kt` (`ScanSession`) → `GameTracker.kt` (`PositionReconstructor`)
-- `UciEngine.kt`, `LocalStockfish.kt`, `ElfBinaryValidator.kt`, `CloudAnalysis.kt`, `EngineFormat.kt`
-- `MainActivity.kt`, `BoardScanDialog.kt`, `BoardEditor.kt`, `ScreenCaptureService.kt`, `AnalysisOverlayService.kt`
-- Устаревший код 2.x (`BoardImageAnalyzer`, `BoardOccupancyClassifier`, `BoardMoveTracker`, `BoardSquareTensorizer`) оставлен для совместимости тестов; новый конвейер его не использует.
-- `ml/` — генерация данных, обучение, экспорт; `verification/` — JVM-проверки; `legacy-browser-extension/` — без изменений.
+1. Clone this repository:
+
+   ```bash
+   git clone https://github.com/Ferdian-99/chesscheat-pro.git
+   ```
+
+2. Open your browser extension page:
+
+   - Chrome: `chrome://extensions`
+   - Edge: `edge://extensions`
+
+3. Enable Developer Mode.
+
+4. Click Load unpacked.
+
+5. Select the project folder you just cloned.
+
+6. Open Chess.com and start a game or board page.
+
+7. Use the floating ChessCheat Pro panel to start analysis.
+
+### Firefox
+
+1. Open `about:debugging#/runtime/this-firefox`.
+
+2. Click Load Temporary Add-on.
+
+3. Select the `manifest.json` file from this project.
+
+4. Open Chess.com and use the floating panel.
+
+Temporary Firefox add-ons are removed when the browser closes, so you may need to load it again next time.
+
+## How to Use
+
+1. Open a Chess.com board.
+
+2. Click Start Analysis.
+
+3. Adjust the depth slider if needed.
+
+4. Read the suggested move in the panel.
+
+5. The board highlights show the suggested start and target squares.
+
+6. Drag the panel by its header if it covers something important.
+
+7. Click Stop Analysis when you are done.
+
+## Troubleshooting
+
+If the extension gives an illegal or weird move, stop the analysis and start it again. In most cases this refreshes the board state and the next suggestion is correct.
+
+If the panel does not appear:
+
+- Refresh the Chess.com page.
+- Make sure the extension is enabled.
+- Make sure you loaded the project folder, not only one file.
+
+If the board highlights look flipped:
+
+- Stop analysis.
+- Refresh the page.
+- Start analysis again after the board is fully loaded.
+
+## Notes
+
+- This extension reads the board directly from the Chess.com page.
+- It works best when the board is fully loaded and not mid-animation.
+- The evaluation bar is shown from White's point of view.
+- Very high analysis depth can be slow, especially in the browser.
+
+## Disclaimer
+
+This project is for learning, experimenting, and understanding how browser extensions, board detection, and chess engines work together.
+
+I do not support cheating, fair-play violations, or using this tool in rated or competitive games. Use it responsibly and respect the rules of the platform you are on.
+
+## License
+
+MIT License. See the project files for details.

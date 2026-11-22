@@ -1,0 +1,55 @@
+{
+ "overall_acc": 0.9997767857142857,
+ "n": 44800,
+ "per_class_recall": {
+  "empty": 1.0,
+  "P": 1.0,
+  "N": 1.0,
+  "B": 1.0,
+  "R": 0.999421965317919,
+  "Q": 1.0,
+  "K": 1.0,
+  "p": 0.9984848484848485,
+  "n": 0.9993815708101422,
+  "b": 0.9976757699012202,
+  "r": 0.998825601879037,
+  "q": 1.0,
+  "k": 1.0
+ },
+ "per_style_acc": {
+  "dejavu": 1.0,
+  "dejavu_bold": 1.0,
+  "freeserif": 0.9998337765957447,
+  "freemono": 0.9998282967032966,
+  "unifont": 0.9994047619047619,
+  "fa_solid": 0.9995492788461539,
+  "material": 0.999875
+ },
+ "piece_vs_empty": {
+  "empty_called_piece": 0.0,
+  "piece_called_empty": 0.0
+ },
+ "color_confusions": 1,
+ "thr0.5": {
+  "coverage": 0.9989955357142857,
+  "acc_on_accepted": 0.9999106245112278
+ },
+ "thr0.6": {
+  "coverage": 0.9982589285714286,
+  "acc_on_accepted": 1.0
+ },
+ "thr0.7": {
+  "coverage": 0.9962946428571429,
+  "acc_on_accepted": 1.0
+ },
+ "thr0.8": {
+  "coverage": 0.9911160714285714,
+  "acc_on_accepted": 1.0
+ },
+ "thr0.9": {
+  "coverage": 0.96515625,
+  "acc_on_accepted": 1.0
+ },
+ "whole_board_exact": 0.9857142857142858,
+ "boards": 700
+}
