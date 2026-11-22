@@ -1,0 +1,4 @@
+# Сторонние компоненты
+* **Stockfish** (GPL-3.0) — не включён в архив исходников. Скрипт `tools/bundle_stockfish.sh` кладёт официальную сборку `stockfish-android-armv8` в `jniLibs`. При распространении APK с Stockfish вы обязаны соблюдать GPL-3.0 (передавать исходный код Stockfish и лицензию, а для приложения — совместимую лицензию). Проверенная при разработке сборка: Stockfish 17.1, sha256 `1c9f0d198577c4ea09db1d0d02a5ae152ea22d88a4675f4441f253f7ce5ed11f` (получена из каталога разработки, происхождение не верифицировалось по подписи; сверяйте с официальным релизом).
+* AndroidX / Jetpack Compose / Material3 / kotlinx-coroutines (Apache-2.0) — через Gradle.
+* Шрифты для генерации обучающих данных (DejaVu, FreeSerif/FreeMono, Unifont, Font Awesome) используются только при обучении; в приложение не входят.

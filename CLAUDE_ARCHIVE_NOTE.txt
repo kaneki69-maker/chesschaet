@@ -1,0 +1,6 @@
+ChessCheat Pro 3.0.0 source archive.
+Contains the full project source, bundled ML weights (app/src/main/assets/piece_cnn.bin), tests and fixtures,
+ML training/eval scripts (ml/), verification harnesses, and documentation.
+NOT included: the Stockfish arm64 binary (80 MB, GPL-3.0; see tools/bundle_stockfish.sh and THIRD_PARTY.md),
+the generated training datasets (reproducible via ml/gen_dataset.py), the legacy extension showcase video, and any APK
+(no Android SDK was available, so no APK was built).
